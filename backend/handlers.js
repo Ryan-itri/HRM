@@ -122,3 +122,28 @@ function handleGetConfig(user) {
         }
     };
 }
+
+function handleBindDevice(payload) {
+    // payload: { account, uuid }
+    if (!payload.account || !payload.uuid) {
+        throw new Error('Missing account or UUID');
+    }
+
+    var users = getPersonnelData();
+    var target = users.find(function (u) { return u.Account === payload.account; });
+
+    if (!target) {
+        throw new Error('User not found: ' + payload.account);
+    }
+
+    // Update UUID
+    // We reuse editPersonnel. It merges data.
+    var updateData = {
+        UUID: payload.uuid
+    };
+
+    editPersonnel(payload.account, updateData);
+    logSystemEvent('INFO', 'DEVICE', 'Device Bound: ' + payload.uuid, payload.account);
+
+    return { status: 'success', message: 'Device bound successfully' };
+}

@@ -3,11 +3,17 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../api'
 import PersonnelForm from '../components/PersonnelForm.vue'
+import QRCode from 'qrcode'
 
 const router = useRouter()
 const currentTab = ref('personnel')
 const personnelList = ref<any[]>([])
 const isLoading = ref(false)
+
+// QR Modal State
+const showQrModal = ref(false)
+const qrCodeUrl = ref('')
+const qrTargetAccount = ref('')
 
 // Modal State
 const showModal = ref(false)
@@ -89,6 +95,22 @@ const showNotImplemented = (feature: string) => {
     alert(`${feature}功能將在下一階段實作`)
 }
 
+const generateQrCode = async (account: string) => {
+    try {
+        // Generate URL for Binding Page
+        // Assuming hash mode: http://domain/#/bind?account=xxx
+        const baseUrl = window.location.href.split('#')[0]
+        const bindUrl = `${baseUrl}#/bind?account=${account}`
+        
+        qrCodeUrl.value = await QRCode.toDataURL(bindUrl)
+        qrTargetAccount.value = account
+        showQrModal.value = true
+    } catch (err) {
+        console.error(err)
+        alert('QR Code 產生失敗')
+    }
+}
+
 onMounted(() => {
     fetchPersonnel()
 })
@@ -125,6 +147,7 @@ onMounted(() => {
               <th>帳號</th>
               <th>角色</th>
               <th>部門</th>
+              <th>裝置 ID (UUID)</th>
               <th>狀態</th>
               <th>操作</th>
             </tr>
@@ -135,12 +158,14 @@ onMounted(() => {
               <td>{{ user.Account }}</td>
               <td>{{ user.Role }}</td>
               <td>{{ user.Department }}</td>
+              <td class="uuid-cell">{{ user.UUID || '未綁定' }}</td>
               <td>
                   <span :class="user.IsActive ? 'status-working' : 'status-leave'">
                       {{ user.IsActive ? '啟用' : '停用' }}
                   </span>
               </td>
               <td class="actions-cell">
+                  <button class="nano-btn secondary small" @click="generateQrCode(user.Account)" title="綁定裝置">綁定</button>
                   <button class="nano-btn secondary small" @click="openEditModal(user)">編輯</button>
                   <button class="nano-btn warning small" @click="handleDelete(user.Account)" v-if="user.Role !== 'admin'">刪除</button>
               </td>
@@ -160,6 +185,20 @@ onMounted(() => {
         @close="showModal = false"
         @save="handleSave"
     />
+    
+    <!-- QR Code Modal -->
+    <div v-if="showQrModal" class="modal-overlay" @click.self="showQrModal = false">
+        <div class="modal-card">
+            <h3>裝置綁定 QR Code</h3>
+            <p>請使用手機掃描以綁定 <strong>{{ qrTargetAccount }}</strong></p>
+            <div class="qr-container">
+                <img :src="qrCodeUrl" alt="QR Code" />
+            </div>
+            <div class="modal-actions">
+                <button class="nano-btn" @click="showQrModal = false">關閉</button>
+            </div>
+        </div>
+    </div>
   </div>
 </template>
 
@@ -275,5 +314,56 @@ onMounted(() => {
     padding: 2rem;
     text-align: center;
     color: var(--color-text-muted);
+}
+
+.uuid-cell {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* Modal Overlay (Shared with PersonnelForm ideally, but duplicated here for simplicity) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    background: #2a2a2a; /* Dark theme match */
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    text-align: center;
+    color: white;
+}
+
+.qr-container {
+    background: white;
+    padding: 1rem;
+    margin: 1.5rem auto;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.qr-container img {
+    display: block;
+    width: 200px;
+    height: 200px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
 }
 </style>

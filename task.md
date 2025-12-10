@@ -24,9 +24,19 @@
         - [x] Verify/Update `db.js` for User CRUD.
         - [x] Implement `getUsers`, `addUser`, `updateUser`, `deleteUser` in `handlers.js`.
         - [x] Update `main.js` routing.
-    - [/] **Frontend (Vue)**
+    - [x] **Frontend (Vue)**
         - [x] Create `PersonnelForm.vue` (Modal component).
         - [x] Update `AdminDashboard.vue` to fetch data from API.
         - [x] Integrate Add/Edit/Delete actions with API.
-        - [x] Debug "Permission Denied" issue due to Role case sensitivity.
+        - [x] Debug "Permission Denied" and "Password Hashing" issues (Version 8 fix).
+
+- [x] **Device Binding Feature (QR Code)**
+    - [x] **Frontend Setup**
+        - [x] Install `qrcode` package.
+        - [x] Create `BindDevice.vue` (Mobile UI).
+        - [x] Update `router/index.ts`.
+        - [x] Update `AdminDashboard.vue` (QR Button & Modal).
+    - [x] **Backend Implementation**
+        - [x] Update `main.js` (Route `bind_device`).
+        - [x] Update `handlers.js` (`handleBindDevice`).
 

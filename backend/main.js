@@ -24,7 +24,9 @@ function doPost(e) {
 
     // Auth Check (Except login/check_session)
     var user = null;
-    if (action !== 'login') {
+    // Auth Check (Except login/check_session/bind_device)
+    var user = null;
+    if (action !== 'login' && action !== 'bind_device') {
       user = verifySession(sessionId); // Implemented in auth.js
     }
 
@@ -60,6 +62,9 @@ function doPost(e) {
       case 'get_status_board':
         // Public or Staff
         output = handleGetStatusBoard();
+        break;
+      case 'bind_device':
+        output = handleBindDevice(payload);
         break;
       default:
         output.message = 'Invalid Action: ' + action;
