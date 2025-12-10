@@ -1,5 +1,6 @@
 /*
  * Request Handlers
+ * FORCE UPDATE VERSION 8
  */
 
 function handleGetPersonnel(payload) {
@@ -70,6 +71,13 @@ function handleUpdatePersonnel(payload, user) {
         if (!payload.data.Password) {
             payload.data.Password = '123456';
         }
+
+        // Hash password before saving
+        var rawPass = payload.data.Password;
+        logSystemEvent('INFO', 'PRE_HASH', 'Raw: ' + rawPass, user.account);
+        payload.data.Password = computeHash(rawPass);
+        logSystemEvent('INFO', 'POST_HASH', 'Hashed: ' + payload.data.Password, user.account);
+
         // Force IsActive true for new
         payload.data.IsActive = true;
 
@@ -82,6 +90,11 @@ function handleUpdatePersonnel(payload, user) {
         // If password is blank/empty, remove it from updates so we don't overwrite with empty
         if (!payload.data.Password) {
             delete payload.data.Password;
+        } else {
+            // If password is being updated, hash it
+            logSystemEvent('INFO', 'PRE_HASH_EDIT', 'Raw: ' + payload.data.Password, user.account);
+            payload.data.Password = computeHash(payload.data.Password);
+            logSystemEvent('INFO', 'POST_HASH_EDIT', 'Hashed: ' + payload.data.Password, user.account);
         }
 
         editPersonnel(payload.data.Account, payload.data);
