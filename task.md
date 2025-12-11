@@ -94,8 +94,7 @@
     - [x] Update `LoginView.vue` to store `user_name` (Add fallback logic).
     - [x] Update `MobileCheckIn.vue` to display `user_name` (Add fallback logic).
 
-- [x] **Mobile Check-in Features**
-    - [x] **Functional**: Add `handleCheckIn` calling `check_in_out` API.
-    - [x] **UI**: Add Date/Clock display.
-    - [x] **UI**: Add "View Status Board" button (Link to `/kiosk`).
-    - [x] **UI**: Show current status label (e.g. "Checked In").
+- [x] **Enhance Mobile Experience**
+    - [x] **Kiosk RWD**: Update `KioskBoard.vue` CSS for mobile devices (Responsive Grid).
+    - [x] **Check-in Logic**: Update `MobileCheckIn.vue` to require Location/Time for "外出" and Location for "公出".
+    - [x] **UI**: Add Input Modal for extra check-in info.

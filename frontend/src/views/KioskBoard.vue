@@ -144,4 +144,50 @@ const getStatusColor = (status: string) => {
   color: black;
   font-weight: bold;
 }
+
+@media (max-width: 768px) {
+    .kiosk-page {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+        height: auto;
+        min-height: 100vh;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .qr-sidebar {
+        grid-row: 2;
+        padding: 1rem;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 1rem;
+        text-align: left;
+    }
+    
+    .qr-sidebar h3 {
+        margin: 0;
+    }
+    
+    .qr-placeholder {
+        display: none; /* Hide QR on mobile view to save space, or make small */
+    }
+    
+    .refresh-hint {
+        display: none;
+    }
+
+    .grid-container {
+        grid-template-columns: 1fr; /* Single column for user cards on mobile */
+    }
+    
+    .user-card {
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .status-badge {
+        align-self: center;
+    }
+}
 </style>
