@@ -25,11 +25,21 @@ function handleGetPersonnel(payload) {
 function handleGetStatusBoard() {
     var ss = getMainDb();
 
+    // Debug: Log DB ID to SystemLog (One time checking)
+    // logSystemEvent('DEBUG', 'DB_CHECK', 'Using DB: ' + ss.getId(), 'system');
+
     // 1. Get All Personnel who should be shown
     var peopleData = getPersonnelData(); // Returns array of objects
+
+    // Debug: Log first person data (optional)
+    // if (peopleData.length > 0) {
+    //    logSystemEvent('DEBUG', 'DATA_CHECK', 'P1: ' + peopleData[0].Name + ', Show: ' + peopleData[0].ShowOnBoard, 'system');
+    // }
+
     var visiblePeople = peopleData.filter(function (p) {
         // Handles "true", true, "TRUE"
-        return String(p.ShowOnBoard).toLowerCase() === 'true';
+        var val = String(p.ShowOnBoard).toLowerCase();
+        return val === 'true';
     });
 
     // 2. Get Current Statuses
