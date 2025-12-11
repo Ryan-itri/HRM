@@ -15,7 +15,8 @@ function handleGetPersonnel(payload) {
             UUID: u.UUID,
             Title: u.Title,
             Department: u.Department,
-            IsActive: u.IsActive
+            IsActive: u.IsActive,
+            ShowOnBoard: u.ShowOnBoard
         };
     });
     return { status: 'success', data: safeData };
