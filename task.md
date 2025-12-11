@@ -76,3 +76,9 @@
 
 - [x] **UI Layout Adjustments**
     - [x] Update `LoginView.vue` (Remove subtitle, Move Kiosk Name).
+
+- [x] **Strict Device UUID Login**
+    - [x] Update `AuthorizeLogin.vue`.
+        - Ensure UUID generation.
+        - If login fails -> Show Error (Access Denied) & Display UUID.
+        - Remove fallback to manual login (`router.push('/')`).

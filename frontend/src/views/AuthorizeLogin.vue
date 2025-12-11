@@ -3,7 +3,7 @@
     <div class="card">
       <div v-if="state === 'verifying'" class="status">
         <div class="loading-spinner"></div>
-        <p>正在登入...</p>
+        <p>正在確認裝置權限...</p>
       </div>
 
       <div v-else-if="state === 'success'" class="success-box">
@@ -13,55 +13,68 @@
       </div>
 
       <div v-else class="error-box">
-        <div class="icon">❌</div>
-        <h3>錯誤</h3>
-        <p>{{ errorMessage }}</p>
-        <button @click="router.push('/')" class="nano-btn">前往登入頁</button>
+        <div class="icon">🚫</div>
+        <h3>禁止存取</h3>
+        <p>此裝置尚未被授權存取系統。</p>
+        
+        <div class="device-info">
+            <p class="label">請將此代碼提供給管理員：</p>
+            <div class="uuid-box">{{ currentUuid }}</div>
+        </div>
+        
+        <div class="help-text">
+            綁定完成後，請重新掃描 QR Code。
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { api } from '../api'
 
-const route = useRoute()
 const router = useRouter()
 const state = ref<'verifying' | 'success' | 'error'>('verifying')
-const errorMessage = ref('')
+const currentUuid = ref('')
 
 onMounted(async () => {
-    // 1. Check existing session
+    // 1. Ensure Device UUID exists
+    let uuid = localStorage.getItem('device_uuid')
+    if (!uuid) {
+        uuid = crypto.randomUUID()
+        localStorage.setItem('device_uuid', uuid)
+    }
+    currentUuid.value = uuid
+
+    // 2. Check Existing Session
     let token = localStorage.getItem('session')
     
-    // 2. If no session, try Auto-Login by Device UUID
+    // 3. If no session, try Auto-Login by Device UUID
     if (!token) {
-        const uuid = localStorage.getItem('device_uuid')
-        if (uuid) {
-            try {
-                const res = await api.post<any>('login_by_device', { uuid })
-                if (res) {
-                    localStorage.setItem('session', res.token)
-                    localStorage.setItem('role', res.user.role)
-                    token = res.token
-                }
-            } catch (e) {
-                console.log('Auto login failed', e)
+        try {
+            const res = await api.post<any>('login_by_device', { uuid })
+            if (res && res.token) {
+                localStorage.setItem('session', res.token)
+                localStorage.setItem('role', res.user.role)
+                token = res.token
             }
+        } catch (e) {
+            console.log('Auto login failed', e)
         }
     }
 
-    // 3. Redirect
+    // 4. Final Decision
     if (token) {
         state.value = 'success'
         setTimeout(() => {
             router.push('/checkin')
         }, 1500)
     } else {
-        alert('請先登入您的帳號 (或綁定此裝置以啟用快速登入)')
-        router.push('/')
+        // STRICT MODE: Deny Access
+        state.value = 'error'
+        // Do NOT redirect to login page
     }
 })
 </script>
@@ -86,48 +99,9 @@ onMounted(async () => {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-h2 {
-    margin-bottom: 2rem;
+h3 {
+    margin: 1rem 0;
     color: #333;
-}
-
-.warning-text {
-    color: #666;
-    margin-bottom: 0.5rem;
-}
-
-.device-text {
-    font-family: monospace;
-    background: #eee;
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 2rem;
-    display: inline-block;
-}
-
-.actions {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.nano-btn {
-    padding: 1rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.nano-btn.success {
-    background: #4CAF50;
-    color: white;
-}
-
-.nano-btn.danger {
-    background: #f44336;
-    color: white;
 }
 
 .icon {
@@ -136,7 +110,39 @@ h2 {
 }
 
 .error-box {
-    color: #d32f2f;
+    color: #333;
+}
+
+.error-box .icon {
+    color: #e53935;
+}
+
+.device-info {
+    margin: 2rem 0;
+    background: #fff3e0;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px dashed #ffa726;
+}
+
+.label {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.uuid-box {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    font-size: 1.1rem;
+    word-break: break-all;
+    color: #ef6c00;
+    user-select: all;
+}
+
+.help-text {
+    font-size: 0.9rem;
+    color: #888;
 }
 
 .loading-spinner {
