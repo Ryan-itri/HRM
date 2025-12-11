@@ -207,8 +207,8 @@ onMounted(() => {
               <th>姓名</th>
               <th>帳號</th>
               <th>角色</th>
-              <th>部門</th>
               <th>裝置 ID (UUID)</th>
+              <th>看板顯示</th>
               <th>狀態</th>
               <th>操作</th>
             </tr>
@@ -218,8 +218,11 @@ onMounted(() => {
               <td>{{ user.Name }}</td>
               <td>{{ user.Account }}</td>
               <td>{{ user.Role }}</td>
-              <td>{{ user.Department }}</td>
               <td class="uuid-cell">{{ user.UUID || '未綁定' }}</td>
+              <td style="text-align: center;">
+                  <span v-if="String(user.ShowOnBoard).toLowerCase() === 'true'" style="color: var(--color-success)">✔</span>
+                  <span v-else style="color: var(--color-text-muted)">-</span>
+              </td>
               <td>
                   <span :class="user.IsActive ? 'status-working' : 'status-leave'">
                       {{ user.IsActive ? '啟用' : '停用' }}
@@ -232,7 +235,7 @@ onMounted(() => {
               </td>
             </tr>
             <tr v-if="personnelList.length === 0">
-                <td colspan="6" class="no-data">尚無資料</td>
+                <td colspan="7" class="no-data">尚無資料</td>
             </tr>
           </tbody>
         </table>
