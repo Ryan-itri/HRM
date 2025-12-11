@@ -90,6 +90,12 @@
     - [x] Update `PersonnelForm.vue` to include UUID field.
 
 - [x] **Display Correct User Name**
-    - [x] Update `AuthorizeLogin.vue` to store `user_name`.
-    - [x] Update `LoginView.vue` to store `user_name`.
-    - [x] Update `MobileCheckIn.vue` to display `user_name`.
+    - [x] Update `AuthorizeLogin.vue` to store `user_name` (Add fallback logic).
+    - [x] Update `LoginView.vue` to store `user_name` (Add fallback logic).
+    - [x] Update `MobileCheckIn.vue` to display `user_name` (Add fallback logic).
+
+- [x] **Mobile Check-in Features**
+    - [x] **Functional**: Add `handleCheckIn` calling `check_in_out` API.
+    - [x] **UI**: Add Date/Clock display.
+    - [x] **UI**: Add "View Status Board" button (Link to `/kiosk`).
+    - [x] **UI**: Show current status label (e.g. "Checked In").

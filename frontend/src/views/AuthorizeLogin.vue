@@ -58,7 +58,7 @@ onMounted(async () => {
             // Overwrite any existing session to ensure we are logged in as the bound user
             localStorage.setItem('session', res.token)
             localStorage.setItem('role', res.user.role)
-            localStorage.setItem('user_name', res.user.name)
+            localStorage.setItem('user_name', res.user.name || res.user.Name || res.user.account || '使用者')
             
             state.value = 'success'
             setTimeout(() => {
