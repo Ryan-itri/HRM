@@ -26,7 +26,7 @@ function doPost(e) {
     var user = null;
     // Auth Check (Except login/check_session/bind_device/qr_flow)
     var user = null;
-    var publicActions = ['login', 'bind_device', 'check_kiosk_permission', 'init_qr_session', 'poll_qr_status', 'login_by_device'];
+    var publicActions = ['login', 'bind_device', 'check_kiosk_permission', 'init_qr_session', 'poll_qr_status', 'login_by_device', 'get_status_board'];
     if (publicActions.indexOf(action) === -1) {
       user = verifySession(sessionId); // Implemented in auth.js
     }
