@@ -95,12 +95,6 @@ const getStatusColor = (status: string) => {
       </div>
       <p class="refresh-hint">每 15 秒自動刷新</p>
       
-      <!-- Debug Info -->
-      <div style="font-size: 0.8rem; color: #888; margin-top: 1rem;">
-          Debug: Count={{users.length}}
-          <div v-if="errorMsg" style="color: red">{{ errorMsg }}</div>
-      </div>
-
       <button class="nano-btn primary mobile-only-btn" @click.stop="goToCheckIn">
           前往個人打卡頁面
       </button>
