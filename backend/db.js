@@ -42,25 +42,7 @@ function getPersonnelData() {
         // Seed Admin
         sheet.appendRow(['Admin', 'admin', 'admin', 'admin', 'admin@example.com', '', 'SysAdmin', 'IT', true, false]);
     } else {
-        // Schema Migration / Verification
-        // Check if ShowOnBoard header exists
-        var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-        var hasShowOnBoard = headers.indexOf('ShowOnBoard') > -1;
-
-        if (!hasShowOnBoard) {
-            // Append header
-            var newCol = headers.length + 1;
-            sheet.getRange(1, newCol).setValue('ShowOnBoard');
-            // Optional: Default existing rows to TRUE or FALSE?
-            // SRS says default is TRUE (implied by previous requests? User said toggle check).
-            // PersonnelForm defaults to TRUE.
-            // Let's set existing rows to TRUE.
-            var lastRow = sheet.getLastRow();
-            if (lastRow > 1) {
-                // Set column values for 2..lastRow
-                sheet.getRange(2, newCol, lastRow - 1, 1).setValue(true);
-            }
-        }
+        ensurePersonnelSchema(sheet);
     }
     var data = sheet.getDataRange().getValues();
     var headers = data[0];
@@ -75,64 +57,6 @@ function getPersonnelData() {
     }
     return results;
 }
-
-// ...
-
-function addPersonnel(data) {
-    var ss = getMainDb();
-    var sheet = ss.getSheetByName('Personnel');
-    var rows = sheet.getDataRange().getValues();
-    for (var i = 1; i < rows.length; i++) {
-        if (rows[i][1] === data.Account) {
-            throw new Error('Account already exists');
-        }
-    }
-
-    // ['Name', 'Account', 'Password', 'Role', 'Email', 'UUID', 'Title', 'Department', 'IsActive', 'ShowOnBoard']
-    sheet.appendRow([
-        data.Name,
-        data.Account,
-        data.Password,
-        data.Role,
-        data.Email,
-        data.UUID || '',
-        data.Title,
-        data.Department,
-        data.IsActive,
-        data.ShowOnBoard // boolean or string
-    ]);
-}
-
-// ... 
-
-function resetDailyStatus() {
-    // 每天清晨AM05:00將所有狀態清除成空白
-    // Clears CurrentStatus sheet content but keeps headers
-    var ss = getMainDb();
-    var sheet = ss.getSheetByName('CurrentStatus');
-    if (sheet) {
-        var lastRow = sheet.getLastRow();
-        if (lastRow > 1) {
-            // Headers are Row 1. Clear content from Row 2 down.
-            // Columns: UserName, Status, LastUpdate, Location, Note
-            // Actually, the user requirement is "Clear Status". 
-            // Should we delete rows? Or update Status to empty?
-            // "將所有狀態清除成空白" -> Implies setting Status/Location/Note to empty string.
-
-            // Option A: Log deletion event and Clear Sheet.
-            // Option B: Update all rows to Status='', Location='', Note=''.
-
-            // If we clear the sheet, then handleGetStatusBoard will return empty list.
-            // But handleGetStatusBoard will be updated to join Personnel list.
-            // So if CurrentStatus is empty, everyone shows as "Unknown/Empty", which is correct for "Reset".
-
-            // So safest is to clear the sheet content.
-            sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
-        }
-    }
-    console.log('Daily Status Reset Complete');
-}
-
 
 function updateUserPassword(account, newHash) {
     var ss = getMainDb();
@@ -151,7 +75,7 @@ function updateUserPassword(account, newHash) {
 function addPersonnel(data) {
     var ss = getMainDb();
     var sheet = ss.getSheetByName('Personnel');
-    // Ensure uniqueness of account
+    ensurePersonnelSchema(sheet);
     var rows = sheet.getDataRange().getValues();
     for (var i = 1; i < rows.length; i++) {
         if (rows[i][1] === data.Account) {
@@ -177,6 +101,7 @@ function addPersonnel(data) {
 function editPersonnel(account, updates) {
     var ss = getMainDb();
     var sheet = ss.getSheetByName('Personnel');
+    ensurePersonnelSchema(sheet);
     var data = sheet.getDataRange().getValues();
     var headers = data[0];
 
@@ -267,6 +192,20 @@ function updateCurrentStatus(record) {
     }
 }
 
+function resetDailyStatus() {
+    // 每天清晨AM05:00將所有狀態清除成空白
+    // Clears CurrentStatus sheet content but keeps headers
+    var ss = getMainDb();
+    var sheet = ss.getSheetByName('CurrentStatus');
+    if (sheet) {
+        var lastRow = sheet.getLastRow();
+        if (lastRow > 1) {
+            sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+        }
+    }
+    console.log('Daily Status Reset Complete');
+}
+
 function getKioskDevicesData() {
     var ss = getMainDb();
     var sheet = ss.getSheetByName('KioskDevices');
@@ -320,4 +259,24 @@ function deleteKioskDevice(uuid) {
         }
     }
     throw new Error('Device not found');
+}
+
+function ensurePersonnelSchema(sheet) {
+    var lastCol = sheet.getLastColumn();
+    // Safety check
+    if (lastCol <= 0) return;
+
+    var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    var hasShowOnBoard = headers.indexOf('ShowOnBoard') > -1;
+
+    if (!hasShowOnBoard) {
+        var newCol = headers.length + 1;
+        sheet.getRange(1, newCol, 1, 1).setValue('ShowOnBoard');
+
+        // Initialize existing rows
+        var lastRow = sheet.getLastRow();
+        if (lastRow > 1) {
+            sheet.getRange(2, newCol, lastRow - 1, 1).setValue(true);
+        }
+    }
 }
