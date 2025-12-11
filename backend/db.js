@@ -41,6 +41,26 @@ function getPersonnelData() {
         sheet.appendRow(['Name', 'Account', 'Password', 'Role', 'Email', 'UUID', 'Title', 'Department', 'IsActive', 'ShowOnBoard']);
         // Seed Admin
         sheet.appendRow(['Admin', 'admin', 'admin', 'admin', 'admin@example.com', '', 'SysAdmin', 'IT', true, false]);
+    } else {
+        // Schema Migration / Verification
+        // Check if ShowOnBoard header exists
+        var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        var hasShowOnBoard = headers.indexOf('ShowOnBoard') > -1;
+
+        if (!hasShowOnBoard) {
+            // Append header
+            var newCol = headers.length + 1;
+            sheet.getRange(1, newCol).setValue('ShowOnBoard');
+            // Optional: Default existing rows to TRUE or FALSE?
+            // SRS says default is TRUE (implied by previous requests? User said toggle check).
+            // PersonnelForm defaults to TRUE.
+            // Let's set existing rows to TRUE.
+            var lastRow = sheet.getLastRow();
+            if (lastRow > 1) {
+                // Set column values for 2..lastRow
+                sheet.getRange(2, newCol, lastRow - 1, 1).setValue(true);
+            }
+        }
     }
     var data = sheet.getDataRange().getValues();
     var headers = data[0];
