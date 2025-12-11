@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { api } from '../api'
 
+const router = useRouter()
 const currentTime = ref(new Date().toLocaleTimeString())
 const currentDate = ref(new Date().toLocaleDateString())
 const users = ref<any[]>([])
@@ -20,7 +22,12 @@ const fetchBoardData = async () => {
     }
 }
 
+const goToCheckIn = () => {
+    router.push('/checkin')
+}
+
 onMounted(() => {
+// ... existing onMounted ...
   // Clock
   clockTimer = setInterval(() => {
     currentTime.value = new Date().toLocaleTimeString('zh-TW', { hour12: false })
@@ -75,13 +82,16 @@ const getStatusColor = (status: string) => {
       </div>
     </main>
 
-    <div class="glass-panel qr-sidebar">
+    <div class="glass-panel qr-sidebar" @click="goToCheckIn">
       <h3>掃描打卡</h3>
       <div class="qr-placeholder">
         <!-- Placeholder for QR Code -->
         <div class="qr-mock">QR</div>
       </div>
       <p class="refresh-hint">每 15 秒自動刷新</p>
+      <button class="nano-btn primary mobile-only-btn" @click.stop="goToCheckIn">
+          前往個人打卡頁面
+      </button>
     </div>
   </div>
 </template>
@@ -143,6 +153,17 @@ const getStatusColor = (status: string) => {
   justify-content: center;
   padding: 2rem;
   text-align: center;
+  cursor: pointer; /* Require interaction hint */
+  transition: transform 0.2s;
+}
+
+.qr-sidebar:active {
+    transform: scale(0.98);
+}
+
+.mobile-only-btn {
+    display: none;
+    margin-top: 1rem;
 }
 
 .qr-mock {
@@ -187,6 +208,10 @@ const getStatusColor = (status: string) => {
     
     .refresh-hint {
         display: none;
+    }
+
+    .mobile-only-btn {
+        display: block; /* Show on mobile */
     }
 
     .grid-container {
