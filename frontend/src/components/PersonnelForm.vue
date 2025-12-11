@@ -17,6 +17,7 @@ const form = ref({
   Department: '',
   Title: '',
   Email: '',
+  UUID: '',
   IsActive: true
 })
 
@@ -35,6 +36,7 @@ watch(() => props.isOpen, (newVal) => {
         Department: '',
         Title: '',
         Email: '',
+        UUID: '',
         IsActive: true
       }
     }
@@ -93,9 +95,13 @@ const handleSubmit = () => {
                 <label>職稱 Title</label>
                 <input v-model="form.Title" class="glass-input" />
             </div>
-             <div class="form-group full-width">
+             <div class="form-group">
                 <label>Email</label>
                 <input v-model="form.Email" type="email" class="glass-input" />
+            </div>
+             <div class="form-group full-width">
+                <label>裝置代碼 Device UUID (選填)</label>
+                <input v-model="form.UUID" class="glass-input" placeholder="用於綁定裝置" />
             </div>
         </div>
 
