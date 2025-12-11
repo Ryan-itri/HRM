@@ -77,3 +77,5 @@
 1. **Visual Check**: 確認 UI 是否符合 "Nano Banana" (高級感)。
 2. **Kiosk Flow**: 模擬 QR Code 刷新與掃描。
 3. **Admin Flow**: 測試人員增刪改查與權限控管。
+4. **Data Persistence**: 確認 `ShowOnBoard` 欄位正確儲存與讀取。
+5. **Board Visibility**: 確認 Kiosk 看板正確顯示勾選的人員 (Debugging Item).

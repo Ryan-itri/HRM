@@ -36,11 +36,11 @@ function handleGetStatusBoard() {
     //    logSystemEvent('DEBUG', 'DATA_CHECK', 'P1: ' + peopleData[0].Name + ', Show: ' + peopleData[0].ShowOnBoard, 'system');
     // }
 
-    var visiblePeople = peopleData.filter(function (p) {
+    var visiblePeople = peopleData; /*.filter(function (p) {
         // Handles "true", true, "TRUE"
         var val = String(p.ShowOnBoard).toLowerCase();
         return val === 'true';
-    });
+    });*/
 
     // 2. Get Current Statuses
     var sheet = ss.getSheetByName('CurrentStatus');

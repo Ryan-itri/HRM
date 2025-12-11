@@ -7,18 +7,23 @@ const router = useRouter()
 const currentTime = ref(new Date().toLocaleTimeString())
 const currentDate = ref(new Date().toLocaleDateString())
 const users = ref<any[]>([])
+const errorMsg = ref('')
 
 let timer: any
 let clockTimer: any
 
 const fetchBoardData = async () => {
     try {
+        errorMsg.value = ''
         const res = await api.post<any[]>('get_status_board')
         if (Array.isArray(res)) {
             users.value = res
+        } else {
+            errorMsg.value = 'Data is not array'
         }
-    } catch (e) {
+    } catch (e: any) {
         console.error('Failed to fetch board data', e)
+        errorMsg.value = e.message || 'Fetch Error'
     }
 }
 
@@ -89,6 +94,13 @@ const getStatusColor = (status: string) => {
         <div class="qr-mock">QR</div>
       </div>
       <p class="refresh-hint">每 15 秒自動刷新</p>
+      
+      <!-- Debug Info -->
+      <div style="font-size: 0.8rem; color: #888; margin-top: 1rem;">
+          Debug: Count={{users.length}}
+          <div v-if="errorMsg" style="color: red">{{ errorMsg }}</div>
+      </div>
+
       <button class="nano-btn primary mobile-only-btn" @click.stop="goToCheckIn">
           前往個人打卡頁面
       </button>
