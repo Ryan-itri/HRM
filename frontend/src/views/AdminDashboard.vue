@@ -23,6 +23,65 @@ const editingItem = ref<any>(null)
 const navigateTo = (tab: string) => {
   currentTab.value = tab
   if (tab === 'personnel') fetchPersonnel()
+  if (tab === 'kiosk') fetchKioskDevices()
+}
+
+// Kiosk State
+const kioskDevices = ref<any[]>([])
+const newKioskUuid = ref('')
+const newKioskName = ref('')
+const showKioskModal = ref(false)
+
+const fetchKioskDevices = async () => {
+    isLoading.value = true
+    try {
+        const result = await api.post<any[]>('get_kiosk_devices', {}, localStorage.getItem('session') || '')
+        if (Array.isArray(result)) {
+            kioskDevices.value = result
+        }
+    } catch (e: any) {
+        alert('讀取裝置失敗: ' + e.message)
+    } finally {
+        isLoading.value = false
+    }
+}
+
+const handleAddKiosk = async () => {
+    if (!newKioskUuid.value || !newKioskName.value) return alert('缺少必要欄位')
+    try {
+        await api.post('add_kiosk_device', { 
+            uuid: newKioskUuid.value,
+            name: newKioskName.value,
+            description: ''
+        }, localStorage.getItem('session') || '')
+        showKioskModal.value = false
+        newKioskUuid.value = ''
+        newKioskName.value = ''
+        fetchKioskDevices()
+        alert('新增成功')
+    } catch (e: any) {
+        alert('新增失敗: ' + e.message)
+    }
+}
+
+const handleKioskDelete = async (uuid: string) => {
+    if (!confirm('確定刪除此裝置?')) return
+    try {
+        await api.post('delete_kiosk_device', { uuid }, localStorage.getItem('session') || '')
+        fetchKioskDevices()
+    } catch (e: any) {
+        alert('刪除失敗: ' + e.message)
+    }
+}
+
+const useCurrentDevice = () => {
+    let uuid = localStorage.getItem('device_uuid')
+    if (!uuid) {
+        // Auto-generate if missing
+        uuid = crypto.randomUUID()
+        localStorage.setItem('device_uuid', uuid)
+    }
+    newKioskUuid.value = uuid
 }
 
 const goToKiosk = () => {
@@ -122,6 +181,7 @@ onMounted(() => {
       <div class="brand">管理後台</div>
       <ul>
         <li :class="{ active: currentTab === 'personnel' }" @click="navigateTo('personnel')">人員管理</li>
+        <li :class="{ active: currentTab === 'kiosk' }" @click="navigateTo('kiosk')">裝置管理 (Kiosk)</li>
         <li :class="{ active: currentTab === 'logs' }" @click="navigateTo('logs')">系統日誌</li>
         <li :class="{ active: currentTab === 'attendance' }" @click="navigateTo('attendance')">出勤紀錄</li>
         <li class="separator"></li>
@@ -131,15 +191,16 @@ onMounted(() => {
     </nav>
     <main class="content">
       <header class="glass-panel top-bar">
-        <h2>人員資料管理</h2>
-        <button class="nano-btn" @click="openAddModal">新增人員</button>
+        <h2>{{ currentTab === 'kiosk' ? 'Kiosk 裝置白名單' : '人員資料管理' }}</h2>
+        <button class="nano-btn" @click="openAddModal" v-if="currentTab === 'personnel'">新增人員</button>
+        <button class="nano-btn" @click="showKioskModal = true" v-if="currentTab === 'kiosk'">新增裝置</button>
       </header>
       
       <div v-if="isLoading" class="glass-panel loading-state">
           Loading data...
       </div>
 
-      <div v-else class="glass-panel table-container">
+      <div v-else-if="currentTab === 'personnel'" class="glass-panel table-container">
         <table class="nano-table">
           <thead>
             <tr>
@@ -176,6 +237,32 @@ onMounted(() => {
           </tbody>
         </table>
       </div>
+
+      <!-- Kiosk Table -->
+      <div v-else-if="currentTab === 'kiosk' && !isLoading" class="glass-panel table-container">
+          <table class="nano-table">
+            <thead>
+                <tr>
+                    <th>裝置名稱</th>
+                    <th>UUID</th>
+                    <th>新增者</th>
+                    <th>新增時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="dev in kioskDevices" :key="dev.UUID">
+                    <td>{{ dev.Name }}</td>
+                    <td class="uuid-cell">{{ dev.UUID }}</td>
+                    <td>{{ dev.AddedBy }}</td>
+                    <td>{{ new Date(dev.CreatedAt).toLocaleDateString() }}</td>
+                    <td>
+                        <button class="nano-btn warning small" @click="handleKioskDelete(dev.UUID)">刪除</button>
+                    </td>
+                </tr>
+            </tbody>
+          </table>
+      </div>
     </main>
 
     <PersonnelForm 
@@ -196,6 +283,28 @@ onMounted(() => {
             </div>
             <div class="modal-actions">
                 <button class="nano-btn" @click="showQrModal = false">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kiosk Add Modal -->
+    <div v-if="showKioskModal" class="modal-overlay" @click.self="showKioskModal = false">
+        <div class="modal-card">
+            <h3>新增 Kiosk 裝置</h3>
+            <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+                <label>裝置名稱/位置</label>
+                <input type="text" v-model="newKioskName" class="glass-input" placeholder="例如: 大門 Kiosk">
+            </div>
+            <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+                <label>裝置 UUID</label>
+                <div style="display:flex; gap: 0.5rem">
+                    <input type="text" v-model="newKioskUuid" class="glass-input" placeholder="xxxxxxxx-...">
+                    <button class="nano-btn small" @click="useCurrentDevice" title="填入目前瀏覽器ID">本機</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="nano-btn" @click="handleAddKiosk">儲存</button>
+                <button class="nano-btn secondary" @click="showKioskModal = false">取消</button>
             </div>
         </div>
     </div>

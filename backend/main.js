@@ -1,5 +1,5 @@
 /*
- * 派外單位人員管理系統 - Backend Core
+ * 南區研發中心 人員出勤看板 - Backend Core
  * Version: 4.0
  */
 
@@ -7,7 +7,7 @@ function doGet(e) {
   // 返回前端頁面
   return HtmlService.createTemplateFromFile('index')
     .evaluate()
-    .setTitle('派外單位人員管理系統')
+    .setTitle('南區研發中心 人員出勤看板')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -24,9 +24,10 @@ function doPost(e) {
 
     // Auth Check (Except login/check_session)
     var user = null;
-    // Auth Check (Except login/check_session/bind_device)
+    // Auth Check (Except login/check_session/bind_device/qr_flow)
     var user = null;
-    if (action !== 'login' && action !== 'bind_device') {
+    var publicActions = ['login', 'bind_device', 'check_kiosk_permission', 'init_qr_session', 'poll_qr_status', 'login_by_device'];
+    if (publicActions.indexOf(action) === -1) {
       user = verifySession(sessionId); // Implemented in auth.js
     }
 
@@ -65,6 +66,36 @@ function doPost(e) {
         break;
       case 'bind_device':
         output = handleBindDevice(payload);
+        break;
+      case 'login_by_device':
+        output = handleLoginByDevice(payload);
+        break;
+      // QR & Kiosk Logic
+      case 'check_kiosk_permission':
+        output = handleCheckKioskPermission(payload);
+        break;
+      case 'init_qr_session':
+        output = handleInitQRSession(payload);
+        break;
+      case 'poll_qr_status':
+        output = handlePollQRSession(payload);
+        break;
+      case 'approve_qr_session':
+        // User verified
+        output = handleApproveQRSession(payload, user);
+        break;
+      // Kiosk Admin
+      case 'get_kiosk_devices':
+        checkRole(user, ['admin']);
+        output = handleGetKioskDevices();
+        break;
+      case 'add_kiosk_device':
+        checkRole(user, ['admin']);
+        output = handleAddKioskDevice(payload, user);
+        break;
+      case 'delete_kiosk_device':
+        checkRole(user, ['admin']);
+        output = handleDeleteKioskDevice(payload, user);
         break;
       default:
         output.message = 'Invalid Action: ' + action;

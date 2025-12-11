@@ -40,3 +40,39 @@
         - [x] Update `main.js` (Route `bind_device`).
         - [x] Update `handlers.js` (`handleBindDevice`).
 
+- [x] **QR Code Login (Kiosk Mode)**
+    - [x] **Backend Setup**
+        - [x] Update `db.js` (KioskDevices sheet access).
+        - [x] Update `main.js` (Routes: `check_kiosk`, `init_qr`, `poll_qr`, `approve_qr`, `kiosk_crud`).
+        - [x] Update `auth.js` (QR Session logic).
+        - [x] Update `handlers.js` (Kiosk CRUD & Logic).
+    - [x] **Frontend Implementation**
+        - [x] Update `LoginView.vue` (Kiosk mode & QR display).
+        - [x] Create `AuthorizeLogin.vue`.
+        - [x] Update `AdminDashboard.vue` (Device Management Tab).
+        - [x] Update `router/index.ts`.
+
+- [x] **Passive Kiosk Mode**
+    - [x] Update `LoginView.vue` (Clock, Remove redirection).
+    - [x] Update `AuthorizeLogin.vue` (Auto Login & Redirect).
+
+- [x] **System Renaming**
+    - [x] Update `backend/main.js`.
+    - [x] Update `frontend/index.html`.
+    - [x] Update `LoginView.vue` (Multi-line title).
+    - [x] Update `AdminDashboard.vue` link text.
+
+- [x] **Refine System Name (3-Line)**
+    - [x] Update `backend/main.js`.
+    - [x] Update `frontend/index.html`.
+    - [x] Update `LoginView.vue` (3-line title).
+    - [x] Update `KioskBoard.vue` (Title).
+
+- [x] **Final Rename (Remove Dept)**
+    - [x] Update `backend/main.js`.
+    - [x] Update `frontend/index.html`.
+    - [x] Update `LoginView.vue` (2-line title).
+    - [x] Update `KioskBoard.vue` (2-line title).
+
+- [x] **UI Layout Adjustments**
+    - [x] Update `LoginView.vue` (Remove subtitle, Move Kiosk Name).

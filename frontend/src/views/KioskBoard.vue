@@ -11,8 +11,8 @@ const users = ref([
  // ... mock data
 ])
 
-let timer: number
-let clockTimer: number
+let timer: any
+let clockTimer: any
 
 onMounted(() => {
   clockTimer = setInterval(() => {
@@ -37,7 +37,7 @@ const getStatusColor = (status: string) => {
   <div class="kiosk-page">
     <header class="glass-panel header">
       <div class="logo">
-        <h2>派外單位人員狀態</h2>
+        <h2>南區研發中心<br>人員出勤看板</h2>
       </div>
       <div class="clock">
         <div class="time">{{ currentTime }}</div>

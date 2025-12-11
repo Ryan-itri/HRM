@@ -184,3 +184,58 @@ function updateCurrentStatus(record) {
         sheet.appendRow([record.userName, record.status, new Date(), record.location, record.note]);
     }
 }
+
+function getKioskDevicesData() {
+    var ss = getMainDb();
+    var sheet = ss.getSheetByName('KioskDevices');
+    if (!sheet) {
+        sheet = ss.insertSheet('KioskDevices');
+        sheet.appendRow(['UUID', 'Name', 'Description', 'AddedBy', 'CreatedAt']);
+    }
+
+    var data = sheet.getDataRange().getValues();
+    var headers = data[0];
+    var list = [];
+    for (var i = 1; i < data.length; i++) {
+        var item = {};
+        for (var j = 0; j < headers.length; j++) {
+            item[headers[j]] = data[i][j];
+        }
+        list.push(item);
+    }
+    return list;
+}
+
+function addKioskDevice(data) {
+    var ss = getMainDb();
+    var sheet = ss.getSheetByName('KioskDevices');
+    // Check dupe
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+        if (rows[i][0] === data.UUID) {
+            throw new Error('Device UUID already exists');
+        }
+    }
+
+    sheet.appendRow([
+        data.UUID,
+        data.Name,
+        data.Description,
+        data.AddedBy,
+        new Date()
+    ]);
+}
+
+function deleteKioskDevice(uuid) {
+    var ss = getMainDb();
+    var sheet = ss.getSheetByName('KioskDevices');
+    var rows = sheet.getDataRange().getValues();
+
+    for (var i = 1; i < rows.length; i++) {
+        if (rows[i][0] === uuid) {
+            sheet.deleteRow(i + 1);
+            return;
+        }
+    }
+    throw new Error('Device not found');
+}

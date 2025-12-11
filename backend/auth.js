@@ -113,3 +113,101 @@ function getSessionFromCache(token) {
 function generateSessionToken() {
     return Utilities.getUuid();
 }
+
+function loginUserByDevice(uuid) {
+    if (!uuid) return null;
+    var users = getPersonnelData(); // db.js
+    var user = users.find(function (u) { return u.UUID === uuid; });
+
+    if (user && user.IsActive) {
+        var token = generateSessionToken();
+        var sessionUser = {
+            account: user.Account,
+            name: user.Name,
+            role: user.Role,
+            department: user.Department
+        };
+        cacheSession(token, sessionUser);
+        return {
+            token: token,
+            user: sessionUser
+        };
+    }
+    return null;
+}
+
+// QR Code Session Logic (Kiosk)
+
+function initQRSession(deviceUuid) {
+    // 1. Verify Device is Kiosk (Whitelist Check)
+    var device = checkKioskPermission(deviceUuid);
+    if (!device) {
+        throw new Error('Device not authorized for Kiosk mode');
+    }
+
+    // 2. Generate Session ID
+    var sessionId = Utilities.getUuid();
+
+    // 3. Store in Cache (Status: PENDING) - TTL 2 mins (120s)
+    var cache = CacheService.getScriptCache();
+    var data = {
+        status: 'PENDING',
+        deviceUuid: deviceUuid,
+        createdAt: new Date().getTime()
+    };
+    cache.put('QR_' + sessionId, JSON.stringify(data), 120);
+
+    return sessionId;
+}
+
+function pollQRSession(sessionId) {
+    var cache = CacheService.getScriptCache();
+    var json = cache.get('QR_' + sessionId);
+
+    if (!json) return { status: 'EXPIRED' };
+
+    var data = JSON.parse(json);
+
+    if (data.status === 'APPROVED') {
+        // Generate real session token
+        var finalToken = generateSessionToken();
+        var sessionUser = data.user;
+
+        // Cache the real session
+        cacheSession(finalToken, sessionUser);
+
+        // Remove QR session (One-time use)
+        cache.remove('QR_' + sessionId);
+
+        return {
+            status: 'APPROVED',
+            token: finalToken,
+            user: sessionUser
+        };
+    }
+
+    return { status: 'PENDING' };
+}
+
+function approveQRSession(sessionId, approvingUser) {
+    var cache = CacheService.getScriptCache();
+    var json = cache.get('QR_' + sessionId);
+
+    if (!json) throw new Error('Invalid or Expired QR Session');
+
+    var data = JSON.parse(json);
+    if (data.status !== 'PENDING') throw new Error('Session already processed');
+
+    // Update to APPROVED with User Info
+    data.status = 'APPROVED';
+    data.user = {
+        name: approvingUser.name,
+        role: approvingUser.role,
+        account: approvingUser.account
+    };
+
+    cache.put('QR_' + sessionId, JSON.stringify(data), 120);
+
+    return { status: 'success', message: 'Login Approved' };
+}
+

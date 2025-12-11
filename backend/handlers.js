@@ -147,3 +147,83 @@ function handleBindDevice(payload) {
 
     return { status: 'success', message: 'Device bound successfully' };
 }
+
+function handleLoginByDevice(payload) {
+    if (!payload.uuid) return { status: 'error', message: 'Missing UUID' };
+
+    var result = loginUserByDevice(payload.uuid); // in auth.js
+    if (result) {
+        return {
+            status: 'success',
+            data: {
+                token: result.token,
+                user: result.user
+            }
+        };
+    } else {
+        return { status: 'error', message: 'Device not bound or User inactive' };
+    }
+}
+
+// Kiosk & QR Login Handlers
+
+
+function checkKioskPermission(uuid) {
+    if (!uuid) return null;
+    var devices = getKioskDevicesData();
+    // Return device object if found, else null
+    return devices.find(function (d) { return d.UUID === uuid; });
+}
+
+function handleCheckKioskPermission(payload) {
+    var device = checkKioskPermission(payload.uuid);
+    return {
+        status: 'success',
+        data: {
+            isKiosk: !!device,
+            device: device ? { name: device.Name } : null
+        }
+    };
+}
+
+function handleInitQRSession(payload) {
+    var sessionId = initQRSession(payload.uuid); // in auth.js
+    return { status: 'success', data: { sessionId: sessionId } };
+}
+
+function handlePollQRSession(payload) {
+    var result = pollQRSession(payload.sessionId); // in auth.js
+    return { status: 'success', data: result };
+}
+
+function handleApproveQRSession(payload, user) {
+    // payload: { sessionId }
+    return approveQRSession(payload.sessionId, user); // in auth.js
+}
+
+// Kiosk Device CRUD (Admin)
+
+function handleGetKioskDevices() {
+    var list = getKioskDevicesData();
+    return { status: 'success', data: list };
+}
+
+function handleAddKioskDevice(payload, user) {
+    // Frontend sends { uuid, name, description } (lowercase)
+    // DB expects { UUID, Name, Description } (Capitalized)
+    const deviceData = {
+        UUID: payload.uuid,
+        Name: payload.name,
+        Description: payload.description || '',
+        AddedBy: user.account
+    };
+    addKioskDevice(deviceData);
+    logSystemEvent('INFO', 'KIOSK', 'Device Added: ' + deviceData.Name, user.account);
+    return { status: 'success', message: 'Device added' };
+}
+
+function handleDeleteKioskDevice(payload, user) {
+    deleteKioskDevice(payload.uuid);
+    logSystemEvent('WARNING', 'KIOSK', 'Device Deleted: ' + payload.uuid, user.account);
+    return { status: 'success', message: 'Device deleted' };
+}

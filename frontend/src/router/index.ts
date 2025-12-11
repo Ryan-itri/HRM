@@ -4,6 +4,7 @@ import AdminDashboard from '../views/AdminDashboard.vue'
 import KioskBoard from '../views/KioskBoard.vue'
 import MobileCheckIn from '../views/MobileCheckIn.vue'
 import BindDevice from '../views/BindDevice.vue'
+import AuthorizeLogin from '../views/AuthorizeLogin.vue'
 
 const router = createRouter({
     history: createWebHashHistory(), // Hash mode is better for GAS/Static hosting without rewrite support
@@ -33,6 +34,11 @@ const router = createRouter({
             path: '/bind',
             name: 'bind',
             component: BindDevice
+        },
+        {
+            path: '/authorize',
+            name: 'authorize',
+            component: AuthorizeLogin
         }
     ]
 })
