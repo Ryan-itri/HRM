@@ -23,19 +23,49 @@ function handleGetPersonnel(payload) {
 
 function handleGetStatusBoard() {
     var ss = getMainDb();
-    var sheet = ss.getSheetByName('CurrentStatus');
-    if (!sheet) return { status: 'success', data: [] };
 
-    var data = sheet.getDataRange().getValues();
-    var headers = data[0];
-    var list = [];
-    for (var i = 1; i < data.length; i++) {
-        var item = {};
-        for (var j = 0; j < headers.length; j++) {
-            item[headers[j]] = data[i][j];
+    // 1. Get All Personnel who should be shown
+    var peopleData = getPersonnelData(); // Returns array of objects
+    var visiblePeople = peopleData.filter(function (p) {
+        // Handles "true", true, "TRUE"
+        return String(p.ShowOnBoard).toLowerCase() === 'true';
+    });
+
+    // 2. Get Current Statuses
+    var sheet = ss.getSheetByName('CurrentStatus');
+    var statusMap = {};
+    if (sheet) {
+        var data = sheet.getDataRange().getValues();
+        var headers = data[0];
+        // data[i][0] is UserName
+        // Headers: UserName, Status, LastUpdate, Location, Note
+        for (var i = 1; i < data.length; i++) {
+            var row = data[i];
+            statusMap[row[0]] = {
+                status: row[1],
+                lastUpdate: row[2],
+                location: row[3],
+                note: row[4]
+            };
         }
-        list.push(item);
     }
+
+    // 3. Merge
+    var list = visiblePeople.map(function (person) {
+        var st = statusMap[person.Account] || {}; // Match by Account/Name?
+        // Note: updateCurrentStatus writes 'userName' which is user.account.
+        // So we match person.Account
+
+        // Return simplified object for Board
+        return {
+            name: person.Name,
+            status: st.status || '', // Empty if no record
+            location: st.location || '',
+            note: st.note || '',
+            lastUpdate: st.lastUpdate || ''
+        };
+    });
+
     return { status: 'success', data: list };
 }
 

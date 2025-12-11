@@ -94,7 +94,9 @@
     - [x] Update `LoginView.vue` to store `user_name` (Add fallback logic).
     - [x] Update `MobileCheckIn.vue` to display `user_name` (Add fallback logic).
 
-- [x] **Enhance Mobile Experience**
-    - [x] **Kiosk RWD**: Update `KioskBoard.vue` CSS for mobile devices (Responsive Grid).
-    - [x] **Check-in Logic**: Update `MobileCheckIn.vue` to require Location/Time for "外出" and Location for "公出".
-    - [x] **UI**: Add Input Modal for extra check-in info.
+- [x] **Board Visibility & Daily Reset**
+    - [x] **Backend**: Add `ShowOnBoard` field to Personnel Data.
+    - [x] **Backend**: Update `handleGetStatusBoard` to return all enabled personnel (merged with status).
+    - [x] **Backend**: Implement `resetDailyStatus` function (for Time-driven trigger).
+    - [x] **Frontend**: Update `PersonnelForm.vue` to include "Show on Board" checkbox.
+    - [x] **Frontend**: Update `KioskBoard.vue` to fetch real data.

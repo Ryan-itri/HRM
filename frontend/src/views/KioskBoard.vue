@@ -1,35 +1,48 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { api } from '../api'
 
 const currentTime = ref(new Date().toLocaleTimeString())
 const currentDate = ref(new Date().toLocaleDateString())
-const users = ref([
- { name: '王大明', status: '上班', location: 'Office' },
- { name: '李阿美', status: '外出', location: '市政府' },
- { name: '張小華', status: '休假', location: '' },
- { name: '陳建國', status: '下班', location: '' },
- // ... mock data
-])
+const users = ref<any[]>([])
 
 let timer: any
 let clockTimer: any
 
+const fetchBoardData = async () => {
+    try {
+        const res = await api.post<any[]>('get_status_board')
+        if (Array.isArray(res)) {
+            users.value = res
+        }
+    } catch (e) {
+        console.error('Failed to fetch board data', e)
+    }
+}
+
 onMounted(() => {
+  // Clock
   clockTimer = setInterval(() => {
-    currentTime.value = new Date().toLocaleTimeString()
-    currentDate.value = new Date().toLocaleDateString()
+    currentTime.value = new Date().toLocaleTimeString('zh-TW', { hour12: false })
+    currentDate.value = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })
   }, 1000)
+  
+  // Data Loop (15s)
+  fetchBoardData()
+  timer = setInterval(fetchBoardData, 15000)
 })
 
 onUnmounted(() => {
-  clearInterval(clockTimer)
+  if (timer) clearInterval(timer)
+  if (clockTimer) clearInterval(clockTimer)
 })
 
 const getStatusColor = (status: string) => {
   if (status === '上班') return 'var(--color-success)'
   if (status === '外出') return 'var(--color-warning)'
-  if (status === '休假') return 'var(--color-text-muted)'
-  return 'var(--color-text-muted)'
+  if (status === '公出') return 'var(--color-accent)' // Added '公出'
+  if (status === '下班') return 'var(--color-text-muted)'
+  return 'transparent' // Default white/glass
 }
 </script>
 

@@ -18,7 +18,8 @@ const form = ref({
   Title: '',
   Email: '',
   UUID: '',
-  IsActive: true
+  IsActive: true,
+  ShowOnBoard: true
 })
 
 // Reset or Load data
@@ -37,7 +38,8 @@ watch(() => props.isOpen, (newVal) => {
         Title: '',
         Email: '',
         UUID: '',
-        IsActive: true
+        IsActive: true,
+        ShowOnBoard: true
       }
     }
   }
@@ -99,9 +101,17 @@ const handleSubmit = () => {
                 <label>Email</label>
                 <input v-model="form.Email" type="email" class="glass-input" />
             </div>
-             <div class="form-group full-width">
+            <div class="form-group full-width">
                 <label>裝置代碼 Device UUID (選填)</label>
                 <input v-model="form.UUID" class="glass-input" placeholder="用於綁定裝置" />
+            </div>
+
+            <div class="form-group">
+                <label>顯示於看板 Show on Board</label>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" v-model="form.ShowOnBoard" id="showOnBoard" />
+                    <label for="showOnBoard">啟用</label>
+                </div>
             </div>
         </div>
 
@@ -188,5 +198,19 @@ select.glass-input option {
 @keyframes slideUp {
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    height: 48px; /* Match input height */
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
 }
 </style>
