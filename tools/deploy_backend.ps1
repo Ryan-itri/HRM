@@ -27,7 +27,11 @@ try {
         # Create a new version and update the 'Head' or specific deploymentId if known.
         # For simplicity in V4, we just create a new deployment description.
         # Ideally we should grab the deploymentId from .clasp.json or config, but 'clasp deploy' creates a new version.
-        clasp deploy --description "Auto-deploy $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
+        # Update the existing Production Deployment Found in Config
+        # ID: AKfycbxSovG8ZG7zOgh8EMzZOeqsgjStPBBa8LkI1EsJRLVNk-pQryyRL80nkx1oZVU2vE2m2A
+        $DeploymentId = "AKfycbxSovG8ZG7zOgh8EMzZOeqsgjStPBBa8LkI1EsJRLVNk-pQryyRL80nkx1oZVU2vE2m2A"
+        Write-Host "Updating existing deployment ($DeploymentId)..."
+        clasp deploy --deploymentId $DeploymentId --description "Auto-deploy $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
         
         Write-Host "Backend deployment successful!" -ForegroundColor Green
     }
