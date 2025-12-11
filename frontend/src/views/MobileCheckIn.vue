@@ -1,7 +1,7 @@
 <template>
   <div class="mobile-layout">
     <div class="glass-panel status-card">
-      <h2>你好, Ryan</h2>
+      <h2>你好, {{ userName }}</h2>
       <p>目前狀態: <span class="status-out">打卡中...</span></p>
     </div>
 
@@ -13,6 +13,19 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const userName = ref('User')
+
+onMounted(() => {
+    const storedName = localStorage.getItem('user_name')
+    if (storedName) {
+        userName.value = storedName
+    }
+})
+</script>
 
 <style scoped>
 .mobile-layout {

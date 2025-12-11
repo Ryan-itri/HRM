@@ -88,3 +88,8 @@
 
 - [x] **Manual UUID Input (Admin)**
     - [x] Update `PersonnelForm.vue` to include UUID field.
+
+- [x] **Display Correct User Name**
+    - [x] Update `AuthorizeLogin.vue` to store `user_name`.
+    - [x] Update `LoginView.vue` to store `user_name`.
+    - [x] Update `MobileCheckIn.vue` to display `user_name`.

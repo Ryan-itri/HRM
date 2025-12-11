@@ -24,6 +24,7 @@ const handleLogin = async () => {
     if (result && result.token) {
         localStorage.setItem('session', result.token)
         localStorage.setItem('role', result.user.role)
+        localStorage.setItem('user_name', result.user.name)
         
         if (result.user.role === 'admin') {
             router.push('/admin')
