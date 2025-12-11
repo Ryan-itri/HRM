@@ -80,5 +80,11 @@
 - [x] **Strict Device UUID Login**
     - [x] Update `AuthorizeLogin.vue`.
         - Ensure UUID generation.
+- [x] **Strict Device UUID Login**
+    - [x] Update `AuthorizeLogin.vue`.
+        - Ensure UUID generation.
         - If login fails -> Show Error (Access Denied) & Display UUID.
         - Remove fallback to manual login (`router.push('/')`).
+    - [x] **Fix**: Always validate UUID (Ignore existing session shortcut).
+        - If device not bound -> Block (even if session exists).
+        - If bound -> Login as bound user.

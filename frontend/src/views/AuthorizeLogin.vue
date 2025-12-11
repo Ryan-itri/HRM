@@ -48,34 +48,33 @@ onMounted(async () => {
     }
     currentUuid.value = uuid
 
-    // 2. Check Existing Session
-    let token = localStorage.getItem('session')
-    
-    // 3. If no session, try Auto-Login by Device UUID
-    if (!token) {
-        try {
-            const res = await api.post<any>('login_by_device', { uuid })
-            if (res && res.token) {
-                localStorage.setItem('session', res.token)
-                localStorage.setItem('role', res.user.role)
-                token = res.token
-            }
-        } catch (e) {
-            console.log('Auto login failed', e)
+    // 2. ALWAYS Try Login by Device (Enforce Binding Check)
+    // We do NOT check existing session first. We must validate the device.
+    try {
+        const res = await api.post<any>('login_by_device', { uuid })
+        
+        if (res && res.token) {
+            // Success: Device is bound.
+            // Overwrite any existing session to ensure we are logged in as the bound user
+            localStorage.setItem('session', res.token)
+            localStorage.setItem('role', res.user.role)
+            
+            state.value = 'success'
+            setTimeout(() => {
+                router.push('/checkin')
+            }, 1500)
+            return
         }
+    } catch (e) {
+        console.log('Device login failed', e)
+        // Fall through to error state
     }
 
-    // 4. Final Decision
-    if (token) {
-        state.value = 'success'
-        setTimeout(() => {
-            router.push('/checkin')
-        }, 1500)
-    } else {
-        // STRICT MODE: Deny Access
-        state.value = 'error'
-        // Do NOT redirect to login page
-    }
+    // 3. If we get here, Device Login Failed -> Access Denied
+    state.value = 'error'
+    // Clear any potentially invalid session to prevent manual URL navigation bypass (optional but safer)
+    localStorage.removeItem('session')
+    localStorage.removeItem('role')
 })
 </script>
 
